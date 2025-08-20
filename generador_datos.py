@@ -4,7 +4,8 @@ import pandas as pd
 #funcion que crea los archivos
 def datos(num):
     
-    url = "https://github.com/abigailrdrs/datos_pasantia/raw/main/Copia%20de%202019-02-28_Training%20sample%20pour%20l'ordonnancement_Cellule%20Robotis%C3%A9e_Rev1.xlsx"
+    url = "https://raw.githubusercontent.com/abigailrdrs/datos_pasantia/main/Copia%20de%202019-02-28_Training%20sample%20pour%20l'ordonnancement_Cellule%20Robotis%C3%A9e_Rev1%20(6).xlsx"
+
     r = requests.get(url)
     with open("archivo.xlsx", "wb") as f:
         f.write(r.content)
