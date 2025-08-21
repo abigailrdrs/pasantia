@@ -39,7 +39,7 @@ def cargar_archivos_y_modelar(num,max_n):
             # Cargar mf desde columna F (número 5, índice 5)
             mf = df.iloc[:, 5].fillna(0).astype(int).tolist()
             mf = [x - 1 for x in mf]
-            due = [100 for _ in J]
+            due = [100000000 for _ in J]
 
 
             # Crear modelo
