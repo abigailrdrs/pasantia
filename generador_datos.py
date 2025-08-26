@@ -17,6 +17,11 @@ def datos(num):
     nombre_carpeta = "datos_reordenados"
     ruta_carpeta = os.path.join(carpeta_actual, nombre_carpeta)
     # Reordenar los datos
+    
+    columnas = ["Trabajos", "Tiempos","Objetivo"]
+    carpeta = "TIEMPOS"
+    if not os.path.exists(carpeta):
+        os.makedirs(carpeta)
     for i in range(num):
         semilla=42+i
         df_reordenado = df.sample(frac=1, random_state=semilla).reset_index(drop=True)
@@ -24,3 +29,8 @@ def datos(num):
         nombre_archivo = f"archivo_reordenado_{i+1}.xlsx"
         ruta_completa = os.path.join(ruta_carpeta, nombre_archivo)
         df_reordenado.to_excel(ruta_completa, index=False)
+
+        
+        df = pd.DataFrame(columns=columnas)
+        nombre_archivo = os.path.join(carpeta, f"archivo_tiempos{i+1}.xlsx")
+        df.to_excel(nombre_archivo, index=False)

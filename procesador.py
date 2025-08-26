@@ -18,11 +18,17 @@ tiempo_total = 0
 def cargar_archivos_y_modelar(num,max_n):
     carpeta = os.path.join(os.getcwd(), "datos_reordenados")
     resultados = {}
+    #carpeta_2 = os.path.join(os.getcwd(), "TIEMPOS")
     for i in range(num):
         nombre_archivo = f"archivo_reordenado_{i+1}.xlsx"
         ruta_archivo = os.path.join(carpeta, nombre_archivo)
+        #nombre_archivo_2 = f"archivo_tiempos{i+1}.xlsx"
+        #ruta_archivo_2 = os.path.join(carpeta_2, nombre_archivo_2)
+    
         # Leer archivo
         df = pd.read_excel(ruta_archivo)
+        #df2 = pd.read_excel(ruta_archivo_2)
+        u=0
         for n in range(5,max_n):
             J=list(range(n))
 
@@ -101,30 +107,36 @@ def cargar_archivos_y_modelar(num,max_n):
             end = time.time()
 
             resultados[n]=end-start
+
+            #Guardar los datos en los archivos de tiempo
+            #df2.loc[u, "Trabajos"] = n
+            #df2.loc[u, "Tiempos"] = resultados[n]
+            #df2.loc[u, "Objetivo"] = cmax
+            
             #analizar que tiempo es el que me esta imprimiendo
 
             # Mostrar resultados ordenados por tiempo de inicio en cada máquina
             # Verificamos que el modelo encontró solución
-            #if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
-                #print(f"\n✅ Makespan mínimo: {cmax.X}\n")
+            if model.status in [GRB.OPTIMAL, GRB.SUBOPTIMAL]:
+                print(f"\n✅ Makespan mínimo: {cmax.X}\n")
 
                 # Mostrar tiempos ordenados por máquina
-                #for m in M:
-                    #tiempos = []
-                    #for j in J:
-                     #   if t[m, j].X is not None:   # evita errores si alguna variable no está definida
-                      #      tiempos.append((t[m, j].X, j))
+                for m in M:
+                    tiempos = []
+                    for j in J:
+                        if t[m, j].X is not None:   # evita errores si alguna variable no está definida
+                         tiempos.append((t[m, j].X, j))
 
                     # Ordenar por tiempo de inicio
                    # tiempos.sort(key=lambda x: x[0])
 
-                    #print(f"--- Máquina {m+1} ---")
-                    #for inicio, j in tiempos:
-                     #   fin = inicio + proces[m][j]
-                      #  espera = a[m, j].X if a[m, j].X is not None else 0
-                       # print(f"Trabajo {j+1}: inicio = {abs(inicio)}, fin = {abs(fin)}, espera = {abs(espera)}")
-            #else:
-             #   print("\n⚠️ Modelo no tiene solución factible, no se pueden mostrar tiempos.")
+                    print(f"--- Máquina {m+1} ---")
+                    for inicio, j in tiempos:
+                        fin = inicio + proces[m][j]
+                        espera = a[m, j].X if a[m, j].X is not None else 0
+                        print(f"Trabajo {j+1}: inicio = {abs(inicio)}, fin = {abs(fin)}, espera = {abs(espera)}")
+            else:
+                print("\n⚠️ Modelo no tiene solución factible, no se pueden mostrar tiempos.")
 
             #me explica donde hay problemas
             if model.status == GRB.INFEASIBLE:
@@ -136,6 +148,12 @@ def cargar_archivos_y_modelar(num,max_n):
                 for c in model.getConstrs():
                     if c.IISConstr:
                         print(f"Inviable: {c.constrName}")
+        u=u+1  
 
         for i in range(5,max_n):
             print(f" {i}: {resultados[i]}")
+            
+
+
+
+        
