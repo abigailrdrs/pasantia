@@ -18,17 +18,16 @@ tiempo_total = 0
 def cargar_archivos_y_modelar(num,max_n):
     carpeta = os.path.join(os.getcwd(), "datos_reordenados")
     resultados = {}
-    #carpeta_2 = os.path.join(os.getcwd(), "TIEMPOS")
+    carpeta_2 = os.path.join(os.getcwd(), "TIEMPOS")
     for i in range(num):
         nombre_archivo = f"archivo_reordenado_{i+1}.xlsx"
         ruta_archivo = os.path.join(carpeta, nombre_archivo)
-        #nombre_archivo_2 = f"archivo_tiempos{i+1}.xlsx"
-        #ruta_archivo_2 = os.path.join(carpeta_2, nombre_archivo_2)
+        nombre_archivo_2 = f"archivo_tiempos{i+1}.xlsx"
+        ruta_archivo_2 = os.path.join(carpeta_2, nombre_archivo_2)
     
         # Leer archivo
         df = pd.read_excel(ruta_archivo)
-        #df2 = pd.read_excel(ruta_archivo_2)
-        u=0
+        df2 = pd.read_excel(ruta_archivo_2)
         for n in range(5,max_n):
             J=list(range(n))
 
@@ -109,9 +108,11 @@ def cargar_archivos_y_modelar(num,max_n):
             resultados[n]=end-start
 
             #Guardar los datos en los archivos de tiempo
-            #df2.loc[u, "Trabajos"] = n
-            #df2.loc[u, "Tiempos"] = resultados[n]
-            #df2.loc[u, "Objetivo"] = cmax
+            fila = len(df2)  # siguiente fila disponible
+            df2.loc[fila, "Trabajos"] = n
+            df2.loc[fila, "Tiempos"] = resultados[n]
+            df2.loc[fila, "Objetivo"] = cmax.X  # valor numérico de Gurobi
+
             
             #analizar que tiempo es el que me esta imprimiendo
 
@@ -148,7 +149,7 @@ def cargar_archivos_y_modelar(num,max_n):
                 for c in model.getConstrs():
                     if c.IISConstr:
                         print(f"Inviable: {c.constrName}")
-        u=u+1  
+        df2.to_excel(ruta_archivo_2, index=False)
 
         for i in range(5,max_n):
             print(f" {i}: {resultados[i]}")

@@ -31,6 +31,6 @@ def datos(num):
         df_reordenado.to_excel(ruta_completa, index=False)
 
         
-        df = pd.DataFrame(columns=columnas)
-        nombre_archivo = os.path.join(carpeta, f"archivo_tiempos{i+1}.xlsx")
-        df.to_excel(nombre_archivo, index=False)
+        df2 = pd.DataFrame(columns=columnas)
+        nombre_archivo2 = os.path.join(carpeta, f"archivo_tiempos{i+1}.xlsx")
+        df2.to_excel(nombre_archivo2, index=False)
