@@ -28,7 +28,7 @@ def cargar_archivos_y_modelar(num,max_n):
         # Leer archivo
         df = pd.read_excel(ruta_archivo)
         df2 = pd.read_excel(ruta_archivo_2)
-        for n in range(5,max_n):
+        for n in range(9,max_n):
             J=list(range(n))
 
             # Procesamiento: convertir NaN en 0, luego transformar a int
@@ -44,7 +44,7 @@ def cargar_archivos_y_modelar(num,max_n):
             # Cargar mf desde columna F (número 5, índice 5)
             mf = df.iloc[:, 5].fillna(0).astype(int).tolist()
             mf = [x - 1 for x in mf]
-            due = [100000000 for _ in J]
+            due = [1000000000 for _ in J]
 
 
             # Crear modelo
@@ -89,10 +89,45 @@ def cargar_archivos_y_modelar(num,max_n):
                 - Mval * (1 - y[m, j, k])
                 for m in M for j in J for k in J if j != k
             ), name="C20")
-
+            #Restricciones extra de tiempo
+            model.addConstrs((
+                t[0, k] >= t[1, j] + proces[1][j] + a[1, j] + 2*tt
+                - Mval * (1 - y[1, j, k])-Mval * (1 - z[2, 1, j])-Mval * (1 - quicksum(g[e, 0, k] for e in E))
+                for j in J for k in J if j != k
+            ), name="24")
+            model.addConstrs((
+                t[1, k] >= t[0, j] + proces[0][j] + a[0, j] + 2*tt
+                - Mval * (1 - y[0, j, k])-Mval * (1 - z[0, 0, j])-Mval * (1 - quicksum(g[e, 1, k] for e in E))
+                 for j in J for k in J if j != k
+            ), name="25")
+            model.addConstrs((
+                t[0, k] >= t[0, j] +2*tt
+                - Mval * (1 - y[0, j, k])-Mval * (1 - z[1, 0, j])-Mval * (1 - quicksum(g[e, 1, k] for e in E))
+                 for j in J for k in J if j != k
+            ), name="26")
+            model.addConstrs((
+                t[1, k] >= t[1, j] + proces[1][j] + a[1, j] + 2*tt
+                - Mval * (1 - y[1, j, k])-Mval * (1 - z[2, 1, j])-Mval * (1 - quicksum(g[e, 1, k] for e in E))
+                 for j in J for k in J  if j != k
+            ), name="27")
+            model.addConstrs((
+                t[0, k] >= t[0, j] + proces[0][j] + a[0, j] + 2*tt
+                - Mval * (1 - y[0, j, k])-Mval * (quicksum(g[e, 0, k] for e in E))
+                 for j in J for k in J if j != k 
+            ), name="28")
             model.addConstrs((t[mf[j], j] + proces[mf[j]][j] + a[mf[j], j] + tt <= due[j] for j in J), name="C21")
-            model.addConstrs((a[0, j] == (t[mf[j], j] - tt) - (t[0, j] + proces[0][j]) for j in J if mf[j] != 0), name="C22a")
-            model.addConstrs((a[1, j] == (t[mf[j], j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] != 1), name="C22b")
+            #model.addConstrs((a[0, j] == (t[mf[j], j] - tt) - (t[0, j] + proces[0][j]) for j in J if mf[j] != 0), name="C22a")
+            model.addConstrs((a[0, j] >= (t[1, j] - tt) - (t[0, j] + proces[0][j])
+                 for j in J if mf[j] == 1),
+                name="C22a")
+            model.addConstrs((a[1, j] >= c[j] - t[1, j] - proces[1][j] for j in J if mf[j] == 1),
+                name="C22b")
+            #model.addConstrs((a[1, j] == (t[mf[j], j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] != 1), name="C22b")
+            # Solo aplica cuando mf[j] == 0
+            model.addConstrs((a[1, j] >= (t[0, j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] == 0),
+                name="C22c")
+            model.addConstrs((a[0, j] >= c[j] - t[0, j] - proces[0][j] for j in J if mf[j] == 0),
+                name="C22d")
             model.addConstrs((cmax >= t[mf[j], j] + proces[mf[j]][j] + a[mf[j], j] + tt for j in J), name="C28")
 
 
@@ -151,7 +186,7 @@ def cargar_archivos_y_modelar(num,max_n):
                         print(f"Inviable: {c.constrName}")
         df2.to_excel(ruta_archivo_2, index=False)
 
-        for i in range(5,max_n):
+        for i in range(9,max_n):
             print(f" {i}: {resultados[i]}")
             
 
