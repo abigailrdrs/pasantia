@@ -34,3 +34,12 @@ def datos(num):
         df2 = pd.DataFrame(columns=columnas)
         nombre_archivo2 = os.path.join(carpeta, f"archivo_tiempos{i+1}.xlsx")
         df2.to_excel(nombre_archivo2, index=False)
+def info(num):
+    columnas = ["J", "M1",'M2',"Z1",'Z2','Z3','L','EST1','EST2','EST3']
+    carpeta = "INFO"
+    if not os.path.exists(carpeta):
+        os.makedirs(carpeta)
+    for i in range(num):
+        df = pd.DataFrame(columns=columnas)
+        nombre_archivo = os.path.join(carpeta, f"info_archivo{i+1}.xlsx")
+        df.to_excel(nombre_archivo, index=False)

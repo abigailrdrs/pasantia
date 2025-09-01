@@ -19,16 +19,19 @@ def cargar_archivos_y_modelar(num,max_n):
     carpeta = os.path.join(os.getcwd(), "datos_reordenados")
     resultados = {}
     carpeta_2 = os.path.join(os.getcwd(), "TIEMPOS")
+    carpeta_3 = os.path.join(os.getcwd(), "INFO")
     for i in range(num):
         nombre_archivo = f"archivo_reordenado_{i+1}.xlsx"
         ruta_archivo = os.path.join(carpeta, nombre_archivo)
         nombre_archivo_2 = f"archivo_tiempos{i+1}.xlsx"
         ruta_archivo_2 = os.path.join(carpeta_2, nombre_archivo_2)
-    
+        nombre_archivo3 = f"info_archivo{i+1}.xlsx"
+        ruta_archivo_3 = os.path.join( carpeta_3 , nombre_archivo3)  
         # Leer archivo
         df = pd.read_excel(ruta_archivo)
         df2 = pd.read_excel(ruta_archivo_2)
-        for n in range(9,max_n):
+        df3 = pd.read_excel(ruta_archivo_3)
+        for n in range(5,max_n):
             J=list(range(n))
 
             # Procesamiento: convertir NaN en 0, luego transformar a int
@@ -66,7 +69,7 @@ def cargar_archivos_y_modelar(num,max_n):
 
             # Restricciones representativas
             model.addConstrs((quicksum(x[e, j] for e in E) == 1 for j in J), name="C1")
-            model.addConstrs((x[2, j] >= longitudes[j] for j in J), name="C2")
+            model.addConstrs((x[1, j] >= longitudes[j] for j in J), name="C2")
             model.addConstrs((b[e, j, k] + b[e, k, j] <= 1 + Mval * (2 - x[e, j] - x[e, k])
                             for e in E for j in J for k in J if j != k), name="C4_C9")
             model.addConstrs((quicksum(g[e, m, j] for m in M) == x[e, j] for e in E for j in J), name="C10")
@@ -116,18 +119,18 @@ def cargar_archivos_y_modelar(num,max_n):
                  for j in J for k in J if j != k 
             ), name="28")
             model.addConstrs((t[mf[j], j] + proces[mf[j]][j] + a[mf[j], j] + tt <= due[j] for j in J), name="C21")
-            #model.addConstrs((a[0, j] == (t[mf[j], j] - tt) - (t[0, j] + proces[0][j]) for j in J if mf[j] != 0), name="C22a")
-            model.addConstrs((a[0, j] >= (t[1, j] - tt) - (t[0, j] + proces[0][j])
-                 for j in J if mf[j] == 1),
-                name="C22a")
-            model.addConstrs((a[1, j] >= c[j] - t[1, j] - proces[1][j] for j in J if mf[j] == 1),
-                name="C22b")
-            #model.addConstrs((a[1, j] == (t[mf[j], j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] != 1), name="C22b")
+            model.addConstrs((a[0, j] == (t[mf[j], j] - tt) - (t[0, j] + proces[0][j]) for j in J if mf[j] != 0), name="C22a")
+           # model.addConstrs((a[0, j] >= (t[1, j] - tt) - (t[0, j] + proces[0][j])
+           #      for j in J if mf[j] == 1),
+           #     name="C22a")
+            #model.addConstrs((a[1, j] >= c[j] - t[1, j] - proces[1][j] for j in J if mf[j] == 1),
+            #    name="C22b")###
+            model.addConstrs((a[1, j] == (t[mf[j], j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] != 1), name="C22b")
             # Solo aplica cuando mf[j] == 0
-            model.addConstrs((a[1, j] >= (t[0, j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] == 0),
-                name="C22c")
-            model.addConstrs((a[0, j] >= c[j] - t[0, j] - proces[0][j] for j in J if mf[j] == 0),
-                name="C22d")
+            #model.addConstrs((a[1, j] >= (t[0, j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] == 0),
+            #    name="C22c")
+            #model.addConstrs((a[0, j] >= c[j] - t[0, j] - proces[0][j] for j in J if mf[j] == 0),
+            #    name="C22d")###
             model.addConstrs((cmax >= t[mf[j], j] + proces[mf[j]][j] + a[mf[j], j] + tt for j in J), name="C28")
 
 
@@ -147,8 +150,20 @@ def cargar_archivos_y_modelar(num,max_n):
             df2.loc[fila, "Trabajos"] = n
             df2.loc[fila, "Tiempos"] = resultados[n]
             df2.loc[fila, "Objetivo"] = cmax.X  # valor numérico de Gurobi
-
-            
+            #Guardar los datos en los archivos de tiempo
+            if n==max_n-1:
+                for i in range(n):
+                    fila = len(df3)  # siguiente fila disponible
+                    df3.loc[fila, "J"] =J[i]
+                    df3.loc[fila, "M1"] =proces[0][i]
+                    df3.loc[fila, "M2"] =proces[1][i]
+                    df3.loc[fila, "Z1"] =z[0,0,i].X
+                    df3.loc[fila, "Z2"] =z[1,0,i].X
+                    df3.loc[fila, "Z3"] =z[2,0,i].X
+                    df3.loc[fila, "L"] =longitudes[i]
+                    df3.loc[fila, "EST1"] =x[0,i].X
+                    df3.loc[fila, "EST2"] =x[1,i].X
+                    df3.loc[fila, "EST3"] =x[2,i].X
             #analizar que tiempo es el que me esta imprimiendo
 
             # Mostrar resultados ordenados por tiempo de inicio en cada máquina
@@ -185,9 +200,9 @@ def cargar_archivos_y_modelar(num,max_n):
                     if c.IISConstr:
                         print(f"Inviable: {c.constrName}")
         df2.to_excel(ruta_archivo_2, index=False)
+        df3.to_excel(ruta_archivo_3, index=False)
 
-        for i in range(9,max_n):
-            print(f" {i}: {resultados[i]}")
+
             
 
 
