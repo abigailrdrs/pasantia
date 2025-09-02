@@ -31,7 +31,7 @@ def cargar_archivos_y_modelar(num,max_n):
         df = pd.read_excel(ruta_archivo)
         df2 = pd.read_excel(ruta_archivo_2)
         df3 = pd.read_excel(ruta_archivo_3)
-        for n in range(5,max_n):
+        for n in range(9,max_n):
             J=list(range(n))
 
             # Procesamiento: convertir NaN en 0, luego transformar a int
@@ -119,18 +119,18 @@ def cargar_archivos_y_modelar(num,max_n):
                  for j in J for k in J if j != k 
             ), name="28")
             model.addConstrs((t[mf[j], j] + proces[mf[j]][j] + a[mf[j], j] + tt <= due[j] for j in J), name="C21")
-            model.addConstrs((a[0, j] == (t[mf[j], j] - tt) - (t[0, j] + proces[0][j]) for j in J if mf[j] != 0), name="C22a")
-           # model.addConstrs((a[0, j] >= (t[1, j] - tt) - (t[0, j] + proces[0][j])
-           #      for j in J if mf[j] == 1),
-           #     name="C22a")
-            #model.addConstrs((a[1, j] >= c[j] - t[1, j] - proces[1][j] for j in J if mf[j] == 1),
-            #    name="C22b")###
-            model.addConstrs((a[1, j] == (t[mf[j], j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] != 1), name="C22b")
+            #model.addConstrs((a[0, j] == (t[mf[j], j] - tt) - (t[0, j] + proces[0][j]) for j in J if mf[j] != 0), name="C22a")
+            model.addConstrs((a[0, j] >= (t[1, j] - tt) - (t[0, j] + proces[0][j])
+                 for j in J if mf[j] == 1),
+                name="C22a")
+            model.addConstrs((a[1, j] >= c[j] - t[1, j] - proces[1][j] for j in J if mf[j] == 1),
+                name="C22b")###
+            #model.addConstrs((a[1, j] == (t[mf[j], j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] != 1), name="C22b")
             # Solo aplica cuando mf[j] == 0
-            #model.addConstrs((a[1, j] >= (t[0, j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] == 0),
-            #    name="C22c")
-            #model.addConstrs((a[0, j] >= c[j] - t[0, j] - proces[0][j] for j in J if mf[j] == 0),
-            #    name="C22d")###
+            model.addConstrs((a[1, j] >= (t[0, j] - tt) - (t[1, j] + proces[1][j]) for j in J if mf[j] == 0),
+                name="C22c")
+            model.addConstrs((a[0, j] >= c[j] - t[0, j] - proces[0][j] for j in J if mf[j] == 0),
+                name="C22d")###
             model.addConstrs((cmax >= t[mf[j], j] + proces[mf[j]][j] + a[mf[j], j] + tt for j in J), name="C28")
 
 
